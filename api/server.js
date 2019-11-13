@@ -52,8 +52,8 @@ server.post('/api/login', (req, res) => {
 });
 
 server.get('/api/users', restricted, (req, res) => {
-  if (req.decodedToken) { // Not strictly necessary thanks to 'restricted', right?
-    Users.find()
+  if (req.decodedToken && req.decodedToken.department) {
+    Users.findBy({ department: req.decodedToken.department })
       .then(users => {
         res.status(200).json(users);
       })
