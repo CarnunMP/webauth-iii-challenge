@@ -7,6 +7,7 @@ const jwt = require('jsonwebtoken');
 
 const server = express();
 const Users = require('./users-model');
+const restricted = require('./middleware/restricted');
 
 server.use(helmet());
 server.use(express.json());
@@ -48,6 +49,20 @@ server.post('/api/login', (req, res) => {
     .catch(err => {
       res.status(401).send('ERROR: ' + err.message);
     })
+});
+
+server.get('/api/users', restricted, (req, res) => {
+  if (req.decodedToken) { // Not strictly necessary thanks to 'restricted', right?
+    Users.find()
+      .then(users => {
+        res.status(200).json(users);
+      })
+      .catch(err => {
+        res.send(err.message);
+      });
+  } else {
+    res.status(401).send('No credentials provided');
+  }
 });
 
 function generateToken(user) {
